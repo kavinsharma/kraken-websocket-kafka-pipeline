@@ -1,0 +1,57 @@
+📘 Node.js Interview Project — Real-Time Market Data Pipeline (Local Only)
+Project Goal
+The goal of this project is to simulate a real-time data pipeline that ingests live trading data,
+processes it, and delivers it to connected users via WebSocket.
+The system will:
+1. Connect to the Kraken WebSocket API and receive real-time ticker updates for assets
+like BTC/USD and ETH/USD.
+2. Forward each update into a Kafka topic running locally.
+3. Consume the data from Kafka in real time.
+4. Stream the data to all connected clients using a WebSocket server.
+Requirements
+● Use Node.js (JavaScript or TypeScript).
+● Run everything locally without deployment or Docker.
+● Implement a connection to the Kraken WebSocket API (wss://ws.kraken.com).
+● Subscribe to ticker updates for at least two crypto pairs (e.g., BTC/USD and ETH/USD).
+● Extract data such as symbol, timestamp, bid, and ask.
+● Send each new update to a Kafka topic (named quotes.crypto) as a JSON
+message.
+● Consume this topic in a separate Kafka consumer.
+● Implement a basic WebSocket server on ws://localhost:8080.
+● Whenever a Kafka message is received, broadcast it to all connected WebSocket
+clients.
+● Handle client connection, disconnection, and unexpected errors gracefully.
+Kafka Setup (Local)
+Install and run Apache Kafka locally.
+1. Start ZooKeeper.
+2. Start the Kafka broker on localhost:9092.
+3. Create a topic named quotes.crypto.
+You can use command-line tools included with Kafka to perform these tasks.
+Expected Kafka Message Format
+Each ticker update from Kraken should be transformed into a JSON object like this before
+publishing to Kafka:
+json
+CopyEdit
+{
+"symbol": "BTCUSD",
+"timestamp": "2025-05-16T12:00:01.123Z",
+"bid": 64350.55,
+"ask": 64360.10
+}
+Evaluation Criteria
+● End-to-end working pipeline (Kraken → Kafka → WebSocket)
+● Clean and understandable code
+● Proper use of KafkaJS (or equivalent)
+● Real-time responsiveness and message delivery
+● Logging and error handling
+Notes
+● No frontend or UI is required.
+● All tools should be configured to run locally.
+● The solution should be easy to run and test on any machine with Kafka and Node.js
+installed.
+● You may use environment variables to configure ports, topic names, and symbols.
+● Using open-source libraries like kafkajs or ws is allowed and recommended.
+Submission
+● Submit your solution as a GitHub repository or a ZIP file.
+● Include a brief README with setup and run instructions.
+● Mention any assumptions or decisions you made during implementation.
