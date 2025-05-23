@@ -1,6 +1,6 @@
 // Standalone test script for Kraken without Kafka
 require('dotenv').config();
-const KrakenClient = require('./krakenClient');
+const KrakenClient = require('../services/krakenClient');
 
 // Mock Kafka producer
 class MockKafkaProducer {

@@ -1,23 +1,24 @@
 const { Kafka } = require('kafkajs');
-require('dotenv').config();
+const config = require('../config');
+const logger = require('../utils/logger');
 
 class KafkaProducer {
   constructor() {
     const kafka = new Kafka({
       clientId: 'crypto-market-data',
-      brokers: [process.env.KAFKA_BROKER || 'localhost:9092']
+      brokers: [config.KAFKA_BROKER]
     });
     
     this.producer = kafka.producer();
-    this.topic = process.env.KAFKA_TOPIC || 'quotes.crypto';
+    this.topic = config.KAFKA_TOPIC;
   }
 
   async connect() {
     try {
       await this.producer.connect();
-      console.log('Connected to Kafka producer');
+      logger.info('Connected to Kafka producer');
     } catch (error) {
-      console.error('Failed to connect to Kafka producer:', error);
+      logger.error('Failed to connect to Kafka producer:', error);
       throw error;
     }
   }
@@ -29,13 +30,13 @@ class KafkaProducer {
         messages: [{ value: JSON.stringify(data) }]
       });
     } catch (error) {
-      console.error('Error sending message to Kafka:', error);
+      logger.error('Error sending message to Kafka:', error);
     }
   }
 
   async disconnect() {
     await this.producer.disconnect();
-    console.log('Disconnected from Kafka producer');
+    logger.info('Disconnected from Kafka producer');
   }
 }
 

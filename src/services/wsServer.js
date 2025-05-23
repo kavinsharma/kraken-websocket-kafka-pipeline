@@ -1,20 +1,21 @@
 const WebSocket = require('ws');
-require('dotenv').config();
+const config = require('../config');
+const logger = require('../utils/logger');
 
 class WebSocketServer {
   constructor() {
-    this.port = process.env.WS_PORT || 8080;
+    this.port = config.WS_PORT;
     this.wss = null;
     this.clients = new Set();
   }
 
   start() {
     this.wss = new WebSocket.Server({ port: this.port });
-    console.log(`WebSocket server running on ws://localhost:${this.port}`);
+    logger.info(`WebSocket server running on ws://localhost:${this.port}`);
 
     this.wss.on('connection', (ws, req) => {
       const clientIp = req.socket.remoteAddress;
-      console.log(`New client connected from ${clientIp}`);
+      logger.info(`New client connected from ${clientIp}`);
       
       // Mark the connection as alive for ping/pong
       ws.isAlive = true;
@@ -25,12 +26,12 @@ class WebSocketServer {
       this.clients.add(ws);
 
       ws.on('close', () => {
-        console.log(`Client disconnected from ${clientIp}`);
+        logger.info(`Client disconnected from ${clientIp}`);
         this.clients.delete(ws);
       });
 
       ws.on('error', (error) => {
-        console.error(`WebSocket error for client ${clientIp}:`, error);
+        logger.error(`WebSocket error for client ${clientIp}:`, error);
         this.clients.delete(ws);
       });
 
@@ -42,14 +43,14 @@ class WebSocketServer {
     });
 
     this.wss.on('error', (error) => {
-      console.error('WebSocket server error:', error);
+      logger.error('WebSocket server error:', error);
     });
     
     // Set up ping interval to detect stale connections
     this.heartbeatInterval = setInterval(() => {
       this.clients.forEach((ws) => {
         if (ws.isAlive === false) {
-          console.log('Terminating stale connection');
+          logger.warn('Terminating stale connection');
           ws.terminate();
           this.clients.delete(ws);
           return;
@@ -59,7 +60,7 @@ class WebSocketServer {
         try {
           ws.ping();
         } catch (err) {
-          console.error('Error pinging client:', err);
+          logger.error('Error pinging client:', err);
           ws.terminate();
           this.clients.delete(ws);
         }
@@ -75,7 +76,7 @@ class WebSocketServer {
           client.send(JSON.stringify(data));
           broadcastCount++;
         } catch (err) {
-          console.error('Error sending message to client:', err);
+          logger.error('Error sending message to client:', err);
           client.terminate();
           this.clients.delete(client);
         }
@@ -83,7 +84,7 @@ class WebSocketServer {
     });
     
     if (broadcastCount > 0) {
-      console.log(`Broadcasted message to ${broadcastCount} client(s)`);
+      logger.info(`Broadcasted message to ${broadcastCount} client(s)`);
     }
   }
   
@@ -94,7 +95,7 @@ class WebSocketServer {
     
     if (this.wss) {
       this.wss.close();
-      console.log('WebSocket server stopped');
+      logger.info('WebSocket server stopped');
     }
   }
 }

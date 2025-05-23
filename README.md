@@ -228,17 +228,20 @@ If clients can't connect to the WebSocket server:
 ## Project Structure
 
 ```
-├── src/                      # Source code
-│   ├── index.js              # Main application entry point
-│   ├── krakenClient.js       # Kraken WebSocket client
-│   ├── kafkaProducer.js      # Kafka producer
-│   ├── kafkaConsumer.js      # Kafka consumer
-│   ├── wsServer.js           # WebSocket server
-│   └── standalone.js         # Standalone test without Kafka
-├── test-client.js            # WebSocket test client
-├── docker-compose.yml        # Docker Compose configuration
-├── Dockerfile                # Docker image configuration
-├── start.sh                  # Startup script for Docker
-├── package.json              # Node.js dependencies
-└── .env                      # Environment variables
+├── src/
+│   ├── config/           # Centralized configuration (env, constants)
+│   ├── routes/           # API route definitions
+│   ├── controllers/      # Request handlers (business logic entry points)
+│   ├── services/         # Core business logic (Kafka, Kraken, WebSocket, etc.)
+│   ├── utils/            # Utility/helper functions
+│   ├── index.js          # App entry point
+│   └── server.js         # Server startup logic
+├── test/                 # Automated tests
+├── scripts/              # Startup or utility scripts
+├── .env
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── package.json
+└── README.md
 ``` 

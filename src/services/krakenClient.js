@@ -1,20 +1,22 @@
 const WebSocket = require('ws');
-require('dotenv').config();
+const KafkaProducer = require('./kafkaProducer');
+const config = require('../config');
+const logger = require('../utils/logger');
 
 class KrakenClient {
   constructor(kafkaProducer) {
     this.ws = null;
     this.kafkaProducer = kafkaProducer;
-    this.url = process.env.KRAKEN_WS_URL || 'wss://ws.kraken.com';
-    this.pairs = (process.env.CRYPTO_PAIRS || 'XBT/USD,ETH/USD').split(',').map(pair => pair.trim());
+    this.url = config.KRAKEN_WS_URL;
+    this.pairs = config.CRYPTO_PAIRS;
   }
 
   connect() {
-    console.log('Connecting to Kraken WebSocket...');
+    logger.info('Connecting to Kraken WebSocket...');
     this.ws = new WebSocket(this.url);
 
     this.ws.on('open', () => {
-      console.log('Connected to Kraken WebSocket');
+      logger.info('Connected to Kraken WebSocket');
       this.subscribe();
     });
 
@@ -28,7 +30,7 @@ class KrakenClient {
             // Ignore heartbeat messages for cleaner logs
             return;
           }
-          console.log('Received system message:', JSON.stringify(message));
+          logger.info('Received system message:', JSON.stringify(message));
           return;
         }
         
@@ -47,23 +49,23 @@ class KrakenClient {
               ask: parseFloat(tickerData.a[0])
             };
             
-            console.log(`Received ticker update for ${formattedData.symbol}: bid ${formattedData.bid}, ask ${formattedData.ask}`);
+            logger.info(`Received ticker update for ${formattedData.symbol}: bid ${formattedData.bid}, ask ${formattedData.ask}`);
             
             // Send to Kafka
             await this.kafkaProducer.sendMessage(formattedData);
           }
         }
       } catch (error) {
-        console.error('Error processing message:', error);
+        logger.error('Error processing message:', error);
       }
     });
 
     this.ws.on('error', (error) => {
-      console.error('Kraken WebSocket error:', error);
+      logger.error('Kraken WebSocket error:', error);
     });
 
     this.ws.on('close', () => {
-      console.log('Disconnected from Kraken WebSocket, reconnecting in 5 seconds...');
+      logger.warn('Disconnected from Kraken WebSocket, reconnecting in 5 seconds...');
       setTimeout(() => this.connect(), 5000);
     });
   }
@@ -81,7 +83,7 @@ class KrakenClient {
       };
 
       this.ws.send(JSON.stringify(subscriptionMessage));
-      console.log(`Sent subscription request for ${pair}`);
+      logger.info(`Sent subscription request for ${pair}`);
     }
   }
 }
